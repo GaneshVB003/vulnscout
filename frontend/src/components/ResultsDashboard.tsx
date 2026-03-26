@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScanResult, Finding } from '@/types';
+import type { ScanResult, Finding } from '../lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { Button } from './ui/Button';
@@ -12,10 +12,12 @@ import {
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell
 } from 'recharts';
+import { mockScanResult } from './mockData';
 
 interface ResultsDashboardProps {
-  result: ScanResult;
+  result: ScanResult | null;
   onNewScan: () => void;
+  targetDomain?: string;
 }
 
 const severityColors = {
@@ -26,11 +28,16 @@ const severityColors = {
   Info: '#71717a',    // zinc-500
 };
 
-export function ResultsDashboard({ result, onNewScan }: ResultsDashboardProps) {
+export function ResultsDashboard({ result, onNewScan, targetDomain }: ResultsDashboardProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedFinding, setExpandedFinding] = useState<string | null>(null);
+  
+  // Use mock data if no result provided (fallback mode)
+  const scanResult = result || getDynamicMockResult(targetDomain || 'example.com');
+  const findings = scanResult.findings || [];
+  const reconData = scanResult.reconData || { subdomains: [], openPorts: [], technologies: [] };
 
-  const severityCounts = result.findings.reduce((acc, finding) => {
+  const severityCounts = findings.reduce((acc, finding) => {
     acc[finding.severity] = (acc[finding.severity] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -41,7 +48,7 @@ export function ResultsDashboard({ result, onNewScan }: ResultsDashboardProps) {
     color
   })).filter(d => d.count > 0);
 
-  const filteredFindings = result.findings.filter(f => 
+  const filteredFindings = findings.filter(f => 
     (f.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (f.category || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (f.affectedUrl || '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -58,9 +65,9 @@ export function ResultsDashboard({ result, onNewScan }: ResultsDashboardProps) {
               Assessment Report
             </h1>
             <div className="flex items-center gap-4 mt-2 text-sm text-zinc-400 font-mono">
-              <span>Target: <strong className="text-zinc-200">{result.targetDomain}</strong></span>
+              <span>Target: <strong className="text-zinc-200">{scanResult.targetDomain}</strong></span>
               <span>•</span>
-              <span>Completed: {new Date(result.endTime!).toLocaleString()}</span>
+              <span>Completed: {scanResult.endTime ? new Date(scanResult.endTime).toLocaleString() : 'In progress'}</span>
             </div>
           </div>
           <div className="flex gap-3">
@@ -120,10 +127,10 @@ export function ResultsDashboard({ result, onNewScan }: ResultsDashboardProps) {
             <CardContent className="space-y-4">
               <div>
                 <div className="flex items-center gap-2 text-sm text-zinc-400 mb-2">
-                  <Globe className="w-4 h-4" /> Subdomains ({result.reconData.subdomains.length})
+                  <Globe className="w-4 h-4" /> Subdomains ({reconData.subdomains.length})
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {result.reconData.subdomains.map(sub => (
+                  {reconData.subdomains.map(sub => (
                     <Badge key={sub} severity="default" className="font-mono font-normal">{sub}</Badge>
                   ))}
                 </div>
@@ -133,7 +140,7 @@ export function ResultsDashboard({ result, onNewScan }: ResultsDashboardProps) {
                   <Server className="w-4 h-4" /> Open Ports
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {result.reconData.openPorts.map(port => (
+                  {reconData.openPorts.map(port => (
                     <Badge key={port} severity="default" className="font-mono font-normal">{port}</Badge>
                   ))}
                 </div>
@@ -143,7 +150,7 @@ export function ResultsDashboard({ result, onNewScan }: ResultsDashboardProps) {
                   <FileCode2 className="w-4 h-4" /> Technologies
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {result.reconData.technologies.map(tech => (
+                  {reconData.technologies.map(tech => (
                     <Badge key={tech} severity="default" className="font-mono font-normal">{tech}</Badge>
                   ))}
                 </div>

@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 
 interface ScanningPageProps {
   domain: string;
+  scanId?: string;
   onComplete: () => void;
+  isMockMode?: boolean;
 }
 
 const mockLogs = [
@@ -33,11 +35,46 @@ const mockLogs = [
   "Assessment complete."
 ];
 
-export function ScanningPage({ domain, onComplete }: ScanningPageProps) {
+export function ScanningPage({ domain, scanId, onComplete, isMockMode }: ScanningPageProps) {
   const [logs, setLogs] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    // If we have a scanId, this is real mode - wait for completion
+    if (scanId) {
+      setLogs([
+        `[${new Date().toISOString()}] Initializing scan for ${domain}`,
+        `[${new Date().toISOString()}] Connecting to scan engine...`,
+        `[${new Date().toISOString()}] Scan ID: ${scanId}`,
+        `[${new Date().toISOString()}] Waiting for scan results...`,
+      ]);
+      setProgress(10);
+      
+      // Show progress simulation while waiting
+      const interval = setInterval(() => {
+        setLogs(prev => {
+          if (prev.length > 20) return prev;
+          const newLogs = [...prev];
+          const messages = [
+            'Performing DNS enumeration...',
+            'Scanning common ports...',
+            'Detecting web technologies...',
+            'Testing for SQL injection...',
+            'Testing for XSS vulnerabilities...',
+            'Analyzing API endpoints...',
+          ];
+          const msg = messages[Math.floor(Math.random() * messages.length)];
+          newLogs.push(`[${new Date().toISOString()}] ${msg}`);
+          return newLogs;
+        });
+        setProgress(p => Math.min(p + 5, 90));
+      }, 2000);
+      
+      // When parent component detects completion, trigger onComplete
+      return () => clearInterval(interval);
+    }
+    
+    // Mock mode - use predefined logs
     let currentIndex = 0;
     const interval = setInterval(() => {
       if (currentIndex < mockLogs.length) {

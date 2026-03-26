@@ -6,12 +6,21 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
 
 interface LandingPageProps {
   onStartScan: (domain: string, isDeep: boolean) => void;
+  isApiAvailable?: boolean | null;
 }
 
-export function LandingPage({ onStartScan }: LandingPageProps) {
+export function LandingPage({ onStartScan, isApiAvailable }: LandingPageProps) {
   const [domain, setDomain] = useState('');
   const [isDeep, setIsDeep] = useState(false);
   const [agreed, setAgreed] = useState(false);
+
+  // Handle domain input - strip protocol if present
+  const handleDomainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.trim();
+    // Remove protocol if present
+    value = value.replace(/^(https?:\/\/)/, '').replace(/^www\./, '');
+    setDomain(value);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +56,7 @@ export function LandingPage({ onStartScan }: LandingPageProps) {
                     placeholder="e.g., example.com" 
                     className="pl-10 bg-zinc-900 border-zinc-800 h-12 text-lg font-mono focus-visible:ring-red-500/50"
                     value={domain}
-                    onChange={(e) => setDomain(e.target.value)}
+                    onChange={handleDomainChange}
                     required
                   />
                 </div>
