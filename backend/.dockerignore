@@ -1,9 +1,0 @@
-node_modules/
-dist/
-build/
-.git/
-.env
-*.md
-docker-compose.yml
-Dockerfile
-*.log

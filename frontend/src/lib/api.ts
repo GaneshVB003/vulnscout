@@ -1,16 +1,8 @@
 /**
  * VulnScout API Client
- * Connects to the backend security scanning API
+ * Uses relative /api path which Vercel rewrites to backend
  */
-
-// In production (Vercel), use relative path to backend API
-// In development, use localhost
-const isProduction = import.meta.env.PROD || window.location.hostname.includes('vercel.app');
-
-const API_BASE = import.meta.env.VITE_API_URL || 
-  (isProduction ? '/api' : 'http://localhost:8000');
-
-console.log('API Base:', API_BASE, 'Production:', isProduction);
+const API_BASE = '/api';
 
 export interface ScanRequest {
   target: string;
