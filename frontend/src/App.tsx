@@ -32,8 +32,9 @@ export default function App() {
 
   const handleStartScan = async (domain: string, isDeep: boolean) => {
     setTargetDomain(domain);
-    setAppState('scanning');
     setScanResult(null);
+    setAppState('scanning');
+    setScanId('');
     
     try {
       // Try to start a real scan via API
@@ -44,14 +45,22 @@ export default function App() {
       });
       
       setScanId(response.scan_id);
+      console.log('Scan started:', response.scan_id);
       
-      // Poll for results
+      // Poll for results every 2 seconds
       pollRef.current = window.setInterval(async () => {
         try {
           const status = await getScanStatus(response.scan_id);
           setScanResult(status);
+          console.log('Scan status:', status.status, status.progress);
           
-          if (status.status === 'completed' || status.status === 'failed') {
+          if (status.status === 'completed') {
+            if (pollRef.current) {
+              clearInterval(pollRef.current);
+              pollRef.current = null;
+            }
+            setAppState('results');
+          } else if (status.status === 'failed') {
             if (pollRef.current) {
               clearInterval(pollRef.current);
               pollRef.current = null;
@@ -65,8 +74,9 @@ export default function App() {
       
     } catch (error) {
       console.error('Failed to start scan:', error);
-      // Fall back to mock scan if API unavailable
-      setAppState('scanning');
+      // Show error state - don't fall back to fake scan
+      alert('Cannot connect to scanning backend. Please ensure the backend server is running at http://localhost:8000');
+      setAppState('landing');
     }
   };
 
@@ -88,16 +98,22 @@ export default function App() {
   // If API is not available, show mock scan
   const isMockMode = apiAvailable === false;
 
-  // Convert API result to expected format
-  const convertResult = (result: ScanResult) => ({
-    id: result.id || result.targetDomain,
-    targetDomain: result.targetDomain,
+  // Convert API result to expected format for ResultsDashboard
+  const convertResult = (result: any) => ({
+    id: result.scan_id || result.target,
+    targetDomain: result.target,
     status: result.status,
-    startTime: result.startTime,
-    endTime: result.endTime,
+    startTime: result.start_time,
+    endTime: result.end_time,
     progress: result.progress || 100,
+    // Extract findings from the backend response
     findings: result.findings || [],
-    reconData: result.reconData || { subdomains: [], openPorts: [], technologies: [] }
+    // Build recon data from findings
+    reconData: {
+      subdomains: result.findings?.find((f: any) => f.category === 'recon')?.findings?.subdomains || [],
+      openPorts: result.findings?.find((f: any) => f.category === 'recon')?.findings?.ports || [],
+      technologies: result.findings?.find((f: any) => f.category === 'recon')?.findings?.technologies || {}
+    }
   });
 
   return (
@@ -114,6 +130,7 @@ export default function App() {
           scanId={scanId}
           onComplete={handleScanComplete}
           isMockMode={isMockMode}
+          scanResult={scanResult}
         />
       )}
       {appState === 'results' && (

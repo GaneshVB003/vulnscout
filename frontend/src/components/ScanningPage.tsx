@@ -7,6 +7,7 @@ interface ScanningPageProps {
   scanId?: string;
   onComplete: () => void;
   isMockMode?: boolean;
+  scanResult?: any; // Pass real scan data
 }
 
 const mockLogs = [
@@ -49,32 +50,10 @@ export function ScanningPage({ domain, scanId, onComplete, isMockMode }: Scannin
         `[${new Date().toISOString()}] Waiting for scan results...`,
       ]);
       setProgress(10);
-      
-      // Show progress simulation while waiting
-      const interval = setInterval(() => {
-        setLogs(prev => {
-          if (prev.length > 20) return prev;
-          const newLogs = [...prev];
-          const messages = [
-            'Performing DNS enumeration...',
-            'Scanning common ports...',
-            'Detecting web technologies...',
-            'Testing for SQL injection...',
-            'Testing for XSS vulnerabilities...',
-            'Analyzing API endpoints...',
-          ];
-          const msg = messages[Math.floor(Math.random() * messages.length)];
-          newLogs.push(`[${new Date().toISOString()}] ${msg}`);
-          return newLogs;
-        });
-        setProgress(p => Math.min(p + 5, 90));
-      }, 2000);
-      
-      // When parent component detects completion, trigger onComplete
-      return () => clearInterval(interval);
+      return; // Don't add fake logs - wait for real data from parent
     }
     
-    // Mock mode - use predefined logs
+    // Mock mode - use predefined logs (only when no scanId)
     let currentIndex = 0;
     const interval = setInterval(() => {
       if (currentIndex < mockLogs.length) {
@@ -88,7 +67,23 @@ export function ScanningPage({ domain, scanId, onComplete, isMockMode }: Scannin
     }, 400); // Fast simulation
 
     return () => clearInterval(interval);
-  }, [onComplete]);
+  }, [onComplete, scanId, domain, scanResult]);
+
+  // Update progress and logs from real scan result
+  useEffect(() => {
+    if (scanResult && scanResult.status === 'completed') {
+      setProgress(100);
+      setLogs(prev => [...prev, `[${new Date().toISOString()}] Scan completed!`]);
+      onComplete();
+    } else if (scanResult && scanResult.progress) {
+      setProgress(scanResult.progress);
+      if (scanResult.logs && scanResult.logs.length > 0) {
+        // Show latest logs from backend
+        const latestLogs = scanResult.logs.slice(-5);
+        setLogs(prev => [...prev, ...latestLogs]);
+      }
+    }
+  }, [scanResult, onComplete]);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-zinc-100 p-8 flex flex-col items-center justify-center">
