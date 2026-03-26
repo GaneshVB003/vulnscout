@@ -9,13 +9,22 @@ from datetime import datetime
 import os
 
 # Database URL from environment or default
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "postgresql+asyncpg://vulnscout:vulnscout@localhost:5432/vulnscout"
-)
+# Use SQLite if PostgreSQL is not available
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 
-# Create async engine
-engine = create_async_engine(DATABASE_URL, echo=False)
+# If no DATABASE_URL, use SQLite for local development
+if not DATABASE_URL:
+    DATABASE_URL = "sqlite+aiosqlite:///vulnscout.db"
+    
+# Check if using SQLite vs PostgreSQL
+USE_SQLITE = "sqlite" in DATABASE_URL
+
+if USE_SQLITE:
+    # SQLite configuration
+    engine = create_async_engine(DATABASE_URL, echo=False)
+else:
+    # PostgreSQL configuration
+    engine = create_async_engine(DATABASE_URL, echo=False)
 
 # Session factory
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
