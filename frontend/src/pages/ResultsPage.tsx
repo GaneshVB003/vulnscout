@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  Shield, Search, Filter, Download, Trash2, ChevronDown, ChevronRight,
-  AlertTriangle, Globe, Lock, Server, Bug, Key, Terminal
+  Shield, Search, Download, ChevronDown, ChevronRight,
+  AlertTriangle, Server, Bug, Terminal
 } from 'lucide-react';
 import { getScanStatus, exportScan } from '../hooks/useApi';
 import type { ScanStatus, Finding } from '../types';
@@ -88,12 +88,16 @@ export default function ResultsPage() {
 
   // Aggregate findings from all categories
   const allFindings: Finding[] = [];
-  scanData.findings?.forEach((category: Record<string, unknown>) => {
-    const findings = category.findings as Finding[];
-    if (findings) {
-      allFindings.push(...findings);
+  if (scanData.findings) {
+    for (const category of scanData.findings) {
+      if (category && typeof category === 'object' && 'findings' in category) {
+        const findings = (category as { findings: Finding[] }).findings;
+        if (Array.isArray(findings)) {
+          allFindings.push(...findings);
+        }
+      }
     }
-  });
+  }
 
   // Filter findings
   const filteredFindings = allFindings.filter(f => {
@@ -133,15 +137,7 @@ export default function ResultsPage() {
     }
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'recon': return <Globe className="w-4 h-4" />;
-      case 'vulnerabilities': return <Bug className="w-4 h-4" />;
-      case 'api': return <Server className="w-4 h-4" />;
-      case 'bruteforce': return <Key className="w-4 h-4" />;
-      default: return <Shield className="w-4 h-4" />;
-    }
-  };
+  // Unused function removed - category info not displayed in current design
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

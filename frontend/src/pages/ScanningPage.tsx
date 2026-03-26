@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Shield, Activity, CheckCircle, Clock, AlertCircle, ArrowRight } from 'lucide-react';
+import { Activity, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { getScanStatus } from '../hooks/useApi';
 import type { ScanStatus, WSMessage } from '../types';
 

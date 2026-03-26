@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Shield, AlertTriangle, ArrowRight, Activity, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
+import { Shield, AlertTriangle, Activity, Clock } from 'lucide-react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import ScanningPage from './pages/ScanningPage';
