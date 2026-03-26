@@ -1,8 +1,8 @@
 /**
  * VulnScout API Client
- * Uses relative /api path which Vercel rewrites to backend
+ * Uses VITE_API_URL env var for production, relative /api for same-origin
  */
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '';  // Empty means same origin
 
 export interface ScanRequest {
   target: string;

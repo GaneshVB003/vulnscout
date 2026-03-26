@@ -1,0 +1,16 @@
+services:
+  # Combined Backend + Frontend Service
+  - type: web
+    name: vulnscout
+    env: python
+    buildCommand: |
+      cd api && pip install -r requirements.txt
+      cd frontend && npm install && npm run build
+    startCommand: cd api && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: DATABASE_URL
+        value: "sqlite:///vulnscout.db"
+      - key: FRONTEND_DIST
+        value: "../frontend/dist"

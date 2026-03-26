@@ -5,10 +5,12 @@ Security Assessment Tool - For Authorized Testing Only
 import os
 from contextlib import asynccontextmanager
 from typing import Optional
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, HttpUrl
 
 from scanner.engine import ScanEngine
@@ -44,7 +46,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
+# CORS middleware - must be before static mount
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -52,6 +54,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount frontend static files - serve at root but after API routes
+# API routes are added later, so they'll take precedence
+# We'll mount at /static for assets and handle root separately
+# Actually let's just add a catch-all at the end that serves index.html for non-API routes
+
+# Mount frontend static files if FRONTEND_DIST is set (but only for /assets)
+frontend_dist = os.getenv("FRONTEND_DIST")
+if frontend_dist and Path(frontend_dist).exists():
+    app.mount("/assets", StaticFiles(directory=frontend_dist + "/assets", html=False), name="assets")
 
 
 # WebSocket connection manager
@@ -350,3 +362,15 @@ async def general_exception_handler(request: Request, exc: Exception):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+# Catch-all route to serve frontend - must be last!
+# This serves index.html for any route not matched by API routes
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    """Serve frontend for non-API routes"""
+    frontend_dist = os.getenv("FRONTEND_DIST") or str(Path(__file__).parent.parent / "frontend" / "dist")
+    index_path = Path(frontend_dist) / "index.html"
+    if index_path.exists():
+        return FileResponse(str(index_path))
+    return {"error": "Frontend not found"}
