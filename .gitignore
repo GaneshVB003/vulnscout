@@ -1,0 +1,25 @@
+# Temporary files
+.agents_tmp/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
