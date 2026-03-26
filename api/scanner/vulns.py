@@ -108,28 +108,19 @@ class VulnerabilityScanner:
         endpoints = []
         base_urls = []
 
-        # Add main target
+        # Add main target only (quick scan)
         base_urls.append(f"http://{self.target}")
-        base_urls.append(f"https://{self.target}")
+        if self.recon_results.get("technologies"):
+            base_urls.append(f"https://{self.target}")
 
-        # Add discovered subdomains with web services
-        for subdomain in self.recon_results.get("subdomains", []):
-            base_urls.append(f"http://{subdomain['subdomain']}")
-
-        # Common paths to check
+        # Quick paths only - limit for demo
         common_paths = [
-            "/", "/index.html", "/login", "/admin", "/search", "/query",
-            "/user", "/id", "/page", "/post", "/comment", "/view",
-            "/api", "/api/v1", "/api/users", "/api/login",
-            "/register", "/signup", "/forgot-password", "/reset",
-            "/upload", "/file", "/download", "/export",
-            "/profile", "/settings", "/account", "/dashboard",
-            "/admin/login", "/administrator", "/manage",
-            "/wp-admin", "/wp-login.php", "/xmlrpc.php",
+            "/", "/index.html", "/login", "/admin", "/search",
+            "/api", "/wp-admin", "/dashboard",
         ]
 
-        for base in base_urls:
-            for path in common_paths:
+        for base in base_urls[:2]:  # Limit to first 2
+            for path in common_paths[:6]:  # Limit to first 6
                 endpoints.append({
                     "url": base + path,
                     "method": "GET",

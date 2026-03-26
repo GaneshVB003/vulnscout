@@ -2,10 +2,15 @@
 VulnScout Backend - Main API Entry Point
 Security Assessment Tool - For Authorized Testing Only
 """
+import logging
 import os
 from contextlib import asynccontextmanager
 from typing import Optional
 from pathlib import Path
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -154,7 +159,8 @@ async def start_scan(request: ScanRequestModel):
     }
 
     # Start scan in background
-    asyncio.create_task(run_scan(scan_id, target, request.scan_type, request.options))
+    task = asyncio.create_task(run_scan(scan_id, target, request.scan_type, request.options))
+    logger.info(f"Started scan task for {scan_id}")
 
     return ScanResponse(
         scan_id=scan_id,
@@ -165,10 +171,15 @@ async def start_scan(request: ScanRequestModel):
 
 async def run_scan(scan_id: str, target: str, scan_type: str, options: dict):
     """Run the actual security scan"""
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Starting scan {scan_id} for {target}")
+    
     try:
         # Update status
         scan_results[scan_id]["status"] = "running"
         scan_results[scan_id]["logs"].append(f"[{datetime.now().isoformat()}] Initializing scan for {target}")
+        logger.info(f"Scan {scan_id}: Initialized")
 
         # Reconnaissance phase
         await manager.send_message(scan_id, {
@@ -185,6 +196,7 @@ async def run_scan(scan_id: str, target: str, scan_type: str, options: dict):
         })
         scan_results[scan_id]["progress"] = 25
         scan_results[scan_id]["logs"].append(f"[{datetime.now().isoformat()}] Reconnaissance completed - Found {len(recon.subdomains)} subdomains")
+        logger.info(f"Scan {scan_id}: Recon done, {len(recon.subdomains)} subdomains")
 
         # Vulnerability scanning phase
         await manager.send_message(scan_id, {
@@ -192,9 +204,13 @@ async def run_scan(scan_id: str, target: str, scan_type: str, options: dict):
             "message": "Starting vulnerability scanning...",
             "progress": 30
         })
+        logger.info(f"Scan {scan_id}: Starting vuln scan")
 
         vuln_scanner = VulnerabilityScanner(target, recon.get_results())
+        logger.info(f"Scan {scan_id}: VulnScanner created, running scan()")
         vuln_results = await vuln_scanner.scan()
+        logger.info(f"Scan {scan_id}: Vuln scan completed, found {len(vuln_results)} results")
+        
         scan_results[scan_id]["findings"].append({
             "category": "vulnerabilities",
             "findings": vuln_results
