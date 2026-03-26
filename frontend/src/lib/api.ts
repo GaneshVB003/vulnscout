@@ -3,7 +3,14 @@
  * Connects to the backend security scanning API
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// In production (Vercel), use relative path to backend API
+// In development, use localhost
+const isProduction = import.meta.env.PROD || window.location.hostname.includes('vercel.app');
+
+const API_BASE = import.meta.env.VITE_API_URL || 
+  (isProduction ? '/api' : 'http://localhost:8000');
+
+console.log('API Base:', API_BASE, 'Production:', isProduction);
 
 export interface ScanRequest {
   target: string;
