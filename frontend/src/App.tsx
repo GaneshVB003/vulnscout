@@ -7,6 +7,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { ScanningPage } from './components/ScanningPage';
 import { ResultsDashboard } from './components/ResultsDashboard';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { startScan, getScanStatus, checkHealth, type ScanResult, type Finding } from './lib/api';
 
 type AppState = 'landing' | 'scanning' | 'results';
@@ -56,9 +57,11 @@ export default function App() {
     setAppState('scanning');
     setScanId('');
     
+    console.log('State before delay:', { appState: 'scanning', targetDomain: domain, scanId: '' });
+    
     // Delay to allow state update to propagate
     await new Promise(resolve => setTimeout(resolve, 50));
-    console.log('State set to scanning, domain:', domain);
+    console.log('State after delay, about to call API');
     
     try {
       // Try to start a real scan via API
@@ -69,9 +72,9 @@ export default function App() {
         authorized: true
       });
       
-      console.log('startScan response:', response);
+      console.log('startScan SUCCESS:', response);
       setScanId(response.scan_id);
-      console.log('Scan started:', response.scan_id);
+      console.log('Scan started with ID:', response.scan_id);
       
       // Poll for results every 2 seconds
       pollRef.current = window.setInterval(async () => {
@@ -99,7 +102,7 @@ export default function App() {
       }, 2000);
       
     } catch (error) {
-      console.error('Failed to start scan:', error);
+      console.error('API call FAILED:', error);
       // Show error state - don't fall back to fake scan
       console.error('Error details:', error);
       alert('Cannot connect to scanning backend: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -144,35 +147,37 @@ export default function App() {
   });
 
   return (
-    <>
-      {appState === 'landing' && (
-        <LandingPage 
-          onStartScan={handleStartScan} 
-          isApiAvailable={apiAvailable}
-        />
-      )}
-      {appState === 'scanning' && (
-        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-          <div className="text-white">Loading scanning page...</div>
-        </div>
-      )}
-      {appState === 'scanning' && scanId && (
-        <ScanningPage 
-          domain={targetDomain} 
-          scanId={scanId}
-          onComplete={handleScanComplete}
-          isMockMode={isMockMode}
-          scanResult={scanResult}
-        />
-      )}
-      {appState === 'results' && (
-        <ResultsDashboard 
-          result={scanResult ? convertResult(scanResult) : null} 
-          onNewScan={handleNewScan}
-          targetDomain={targetDomain}
-        />
-      )}
-    </>
+    <ErrorBoundary>
+      <div key={appState}>
+        {appState === 'landing' && (
+          <LandingPage 
+            onStartScan={handleStartScan} 
+            isApiAvailable={apiAvailable}
+          />
+        )}
+        {appState === 'scanning' && !scanId && (
+          <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+            <div className="text-white">Loading scanning page...</div>
+          </div>
+        )}
+        {appState === 'scanning' && scanId && (
+          <ScanningPage 
+            domain={targetDomain} 
+            scanId={scanId}
+            onComplete={handleScanComplete}
+            isMockMode={isMockMode}
+            scanResult={scanResult}
+          />
+        )}
+        {appState === 'results' && (
+          <ResultsDashboard 
+            result={scanResult ? convertResult(scanResult) : null} 
+            onNewScan={handleNewScan}
+            targetDomain={targetDomain}
+          />
+        )}
+      </div>
+    </ErrorBoundary>
   );
 }
 
