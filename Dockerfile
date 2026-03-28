@@ -33,12 +33,10 @@ RUN npm install && npm run build
 WORKDIR /app
 COPY api /app/api
 
-# Copy frontend dist built earlier
-COPY frontend/dist /app/frontend/dist
-
 # Expose port (Render provides PORT env var)
 EXPOSE 8000
 
 # Run the application from the api directory for correct imports
+# Frontend was already built above at /app/frontend/dist
 # Set FRONTEND_DIST to point to the frontend dist folder
 CMD ["sh", "-c", "cd /app/api && FRONTEND_DIST=/app/frontend/dist uvicorn main:app --host 0.0.0.0 --port 8000"]
