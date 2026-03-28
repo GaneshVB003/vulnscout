@@ -1,17 +1,8 @@
 services:
   - type: web
     name: vulnscout
-    env: python
-    buildCommand: |
-      curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
-      pip install -r requirements.txt
-      cd ../frontend && npm install && npm run build
-    startCommand: cd ../api && FRONTEND_DIST=../frontend/dist uvicorn main:app --host 0.0.0.0 --port $PORT
+    dockerfilePath: Dockerfile
+    dockerCommand: sh -c "cd api && FRONTEND_DIST=../frontend/dist python -m uvicorn main:app --host 0.0.0.0 --port 10000"
     envVars:
-      - key: PYTHON_VERSION
-        value: "3.11"
       - key: FRONTEND_DIST
         value: ../frontend/dist
-      - key: PORT
-        value: "8000"
-    rootDirectory: api
