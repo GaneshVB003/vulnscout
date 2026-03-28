@@ -96,10 +96,16 @@ class VulnerabilityScanner:
         """Run all vulnerability scans"""
         # Get discovered endpoints
         endpoints = self._discover_endpoints()
+        
+        # Limit endpoints for faster scanning
+        endpoints = endpoints[:4]
 
-        # Scan each endpoint
-        for endpoint in endpoints:
+        # Scan each endpoint with limited payloads
+        for i, endpoint in enumerate(endpoints):
             await self._scan_endpoint(endpoint)
+            # Update progress periodically
+            if (i + 1) % 2 == 0:
+                await asyncio.sleep(0.1)
 
         return self.findings
 

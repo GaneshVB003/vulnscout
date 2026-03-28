@@ -29,11 +29,17 @@ class APISecurityTester:
 
     async def scan(self) -> List[Dict]:
         """Run API security tests"""
-        # Discover API endpoints
-        await self._discover_endpoints()
+        # Discover API endpoints (with timeout)
+        try:
+            await asyncio.wait_for(self._discover_endpoints(), timeout=15.0)
+        except asyncio.TimeoutError:
+            pass
 
+        # Limit endpoints
+        endpoints = self.discovered_endpoints[:5]
+        
         # Test each endpoint
-        for endpoint in self.discovered_endpoints:
+        for endpoint in endpoints:
             await self._test_endpoint(endpoint)
 
         return self.findings
