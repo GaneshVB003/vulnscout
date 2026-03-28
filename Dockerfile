@@ -1,5 +1,5 @@
 # VulnScout Dockerfile for Render
-# Build date: 2026-03-28
+# Build date: 2026-03-28 - REBUILD TRIGGERED
 FROM python:3.11-slim
 
 # Install Node.js 20.x and required build tools
