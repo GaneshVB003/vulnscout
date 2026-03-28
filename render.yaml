@@ -12,4 +12,6 @@ services:
         value: "3.11"
       - key: FRONTEND_DIST
         value: ../frontend/dist
+      - key: PORT
+        value: "8000"
     rootDirectory: api
