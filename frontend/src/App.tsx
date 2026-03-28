@@ -31,6 +31,7 @@ export default function App() {
   }, []);
 
   const handleStartScan = async (domain: string, isDeep: boolean) => {
+    console.log('handleStartScan called', domain, isDeep);
     setTargetDomain(domain);
     setScanResult(null);
     setAppState('scanning');
@@ -38,12 +39,14 @@ export default function App() {
     
     try {
       // Try to start a real scan via API
+      console.log('Calling startScan API...');
       const response = await startScan({
         target: domain,
         scan_type: isDeep ? 'deep' : 'quick',
         authorized: true
       });
       
+      console.log('startScan response:', response);
       setScanId(response.scan_id);
       console.log('Scan started:', response.scan_id);
       
@@ -75,7 +78,8 @@ export default function App() {
     } catch (error) {
       console.error('Failed to start scan:', error);
       // Show error state - don't fall back to fake scan
-      alert('Cannot connect to scanning backend. Please ensure the backend server is running at http://localhost:8000');
+      console.error('Error details:', error);
+      alert('Cannot connect to scanning backend: ' + (error instanceof Error ? error.message : 'Unknown error'));
       setAppState('landing');
     }
   };

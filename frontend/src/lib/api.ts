@@ -60,28 +60,37 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}, timeout 
 }
 
 export async function startScan(request: ScanRequest): Promise<ScanResponse> {
+  console.log('startScan called with:', request);
   const response = await fetchWithTimeout(`${API_BASE}/api/scan`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request)
   });
+  console.log('startScan response status:', response.status);
   
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Failed to start scan' }));
+    console.error('startScan error response:', error);
     throw new Error(error.detail || 'Failed to start scan');
   }
   
-  return response.json();
+  const json = await response.json();
+  console.log('startScan response JSON:', json);
+  return json;
 }
 
 export async function getScanStatus(scanId: string): Promise<ScanResult> {
+  console.log('getScanStatus called for:', scanId);
   const response = await fetchWithTimeout(`${API_BASE}/api/scan/${scanId}`);
+  console.log('getScanStatus response status:', response.status);
   
   if (!response.ok) {
     throw new Error('Failed to get scan status');
   }
   
-  return response.json();
+  const json = await response.json();
+  console.log('getScanStatus response:', json);
+  return json;
 }
 
 export async function listScans(): Promise<ScanResult[]> {
