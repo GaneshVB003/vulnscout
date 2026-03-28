@@ -118,7 +118,12 @@ scan_results: dict[str, dict] = {}
 
 @app.get("/")
 async def root():
-    """API root endpoint"""
+    """Serve frontend for root URL"""
+    frontend_dist = os.getenv("FRONTEND_DIST") or str(Path(__file__).parent.parent / "frontend" / "dist")
+    index_path = Path(frontend_dist) / "index.html"
+    if index_path.exists():
+        return FileResponse(str(index_path))
+    # Fallback to API info if frontend not found
     return {
         "name": "VulnScout API",
         "version": "1.0.0",
