@@ -25,7 +25,6 @@ export function LandingPage({ onStartScan, isApiAvailable }: LandingPageProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('LandingPage handleSubmit called', domain, agreed);
-    alert('Form submitted! domain=' + domain + ', agreed=' + agreed);
     if (domain && agreed) {
       onStartScan(domain, isDeep);
     }
