@@ -40,5 +40,6 @@ WORKDIR /app
 # Expose port (Render provides PORT env var)
 EXPOSE 10000
 
-# Run the application
-CMD ["sh", "-c", "echo 'FRONTEND_DIST: $FRONTEND_DIST' && ls -la $FRONTEND_DIST && cd api && python -m uvicorn main:app --host 0.0.0.0 --port 10000"]
+# Run the application from api directory
+WORKDIR /app/api
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
