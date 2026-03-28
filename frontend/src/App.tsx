@@ -56,6 +56,10 @@ export default function App() {
     setAppState('scanning');
     setScanId('');
     
+    // Delay to allow state update to propagate
+    await new Promise(resolve => setTimeout(resolve, 50));
+    console.log('State set to scanning, domain:', domain);
+    
     try {
       // Try to start a real scan via API
       console.log('Calling startScan API...');
