@@ -96,6 +96,13 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
+# Health check endpoint for debugging
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "ok", "message": "VulnScout API is running"}
+
+
 # Request models
 class ScanRequestModel(BaseModel):
     target: str
