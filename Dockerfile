@@ -36,5 +36,5 @@ COPY api /app/api
 # Expose port (Render provides PORT env var)
 EXPOSE 8000
 
-# Run the application
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the application from the api directory so imports work
+CMD ["sh", "-c", "cd /app/api && uvicorn main:app --host 0.0.0.0 --port 8000"]
