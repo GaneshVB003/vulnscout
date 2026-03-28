@@ -25,9 +25,28 @@ export default function App() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const pollRef = useRef<number | null>(null);
 
+  // Global error handler for the entire app
+  useEffect(() => {
+    window.onerror = (message, source, lineno, colno, error) => {
+      console.error('GLOBAL ERROR:', message, source, lineno, colno, error);
+    };
+    window.onunhandledrejection = (event) => {
+      console.error('UNHANDLED REJECTION:', event.reason);
+    };
+  }, []);
+
   // Check API availability on mount
   useEffect(() => {
-    checkHealth().then(setApiAvailable).catch(() => setApiAvailable(false));
+    console.log('App mounted, checking API...');
+    checkHealth()
+      .then((available) => {
+        console.log('API available:', available);
+        setApiAvailable(available);
+      })
+      .catch((err) => {
+        console.error('API check failed:', err);
+        setApiAvailable(false);
+      });
   }, []);
 
   const handleStartScan = async (domain: string, isDeep: boolean) => {
