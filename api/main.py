@@ -203,7 +203,7 @@ async def run_scan(scan_id: str, target: str, scan_type: str, options: dict):
         scan_results[scan_id]["logs"].append(f"[{datetime.now().isoformat()}] Reconnaissance completed - Found {len(recon.subdomains)} subdomains")
         logger.info(f"Scan {scan_id}: Recon done, {len(recon.subdomains)} subdomains")
 
-        # Vulnerability scanning phase
+        # Vulnerability scanning phase - with progress updates
         await manager.send_message(scan_id, {
             "type": "log",
             "message": "Starting vulnerability scanning...",
@@ -213,17 +213,23 @@ async def run_scan(scan_id: str, target: str, scan_type: str, options: dict):
 
         vuln_scanner = VulnerabilityScanner(target, recon.get_results())
         logger.info(f"Scan {scan_id}: VulnScanner created, running scan()")
-        vuln_results = await vuln_scanner.scan()
+        
+        # Run vuln scan with timeout to prevent hanging
+        try:
+            vuln_results = await asyncio.wait_for(vuln_scanner.scan(), timeout=60.0)
+        except asyncio.TimeoutError:
+            logger.warning(f"Scan {scan_id}: Vuln scan timed out")
+            vuln_results = vuln_scanner.findings  # Get partial results
         logger.info(f"Scan {scan_id}: Vuln scan completed, found {len(vuln_results)} results")
         
+        scan_results[scan_id]["progress"] = 60
         scan_results[scan_id]["findings"].append({
             "category": "vulnerabilities",
             "findings": vuln_results
         })
-        scan_results[scan_id]["progress"] = 60
         scan_results[scan_id]["logs"].append(f"[{datetime.now().isoformat()}] Vulnerability scanning completed")
 
-        # API security testing
+        # API security testing - with timeout
         await manager.send_message(scan_id, {
             "type": "log",
             "message": "Starting API security testing...",
@@ -231,7 +237,11 @@ async def run_scan(scan_id: str, target: str, scan_type: str, options: dict):
         })
 
         api_tester = APISecurityTester(target, recon.get_results())
-        api_results = await api_tester.scan()
+        try:
+            api_results = await asyncio.wait_for(api_tester.scan(), timeout=30.0)
+        except asyncio.TimeoutError:
+            logger.warning(f"Scan {scan_id}: API security testing timed out")
+            api_results = api_tester.findings
         scan_results[scan_id]["findings"].append({
             "category": "api",
             "findings": api_results
@@ -248,7 +258,11 @@ async def run_scan(scan_id: str, target: str, scan_type: str, options: dict):
             })
 
             bf_tester = BruteForceTester(target, recon.get_results())
-            bf_results = await bf_tester.scan()
+            try:
+                bf_results = await asyncio.wait_for(bf_tester.scan(), timeout=30.0)
+            except asyncio.TimeoutError:
+                logger.warning(f"Scan {scan_id}: Brute force testing timed out")
+                bf_results = bf_tester.findings
             scan_results[scan_id]["findings"].append({
                 "category": "bruteforce",
                 "findings": bf_results
