@@ -407,10 +407,15 @@ if __name__ == "__main__":
 
 
 # Catch-all route to serve frontend - must be last!
-# This serves index.html for any route not matched by API routes
+# This serves index.html for any route NOT starting with /api
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
     """Serve frontend for non-API routes"""
+    # Don't serve frontend for API routes
+    if full_path.startswith("api/"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+    
     frontend_dist = os.getenv("FRONTEND_DIST") or str(Path(__file__).parent.parent / "frontend" / "dist")
     index_path = Path(frontend_dist) / "index.html"
     if index_path.exists():
