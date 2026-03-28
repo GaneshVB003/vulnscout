@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VulnScout Test</title>
+</head>
+<body>
+  <div id="root">Loading...</div>
+  <script type="module">
+    console.log('Script loading...');
+    // Try to load the React app
+    try {
+      import('/src/main.tsx').then(() => {
+        console.log('React loaded');
+      }).catch(err => {
+        console.error('React load error:', err);
+        document.getElementById('root').innerHTML = '<pre style="color:red">Error loading React: ' + err + '</pre>';
+      });
+    } catch(e) {
+      console.error('Import error:', e);
+    }
+  </script>
+  <script>
+    console.log('Basic JS loaded');
+    window.onerror = function(msg, url, line) {
+      console.error('ERROR:', msg, url, line);
+      document.getElementById('root').innerHTML = '<pre style="color:red">JS Error: ' + msg + '\nLine: ' + line + '</pre>';
+    };
+  </script>
+</body>
+</html>
