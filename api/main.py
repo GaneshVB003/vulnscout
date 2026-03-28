@@ -96,11 +96,16 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
+from fastapi.responses import JSONResponse, FileResponse
+
 # Health check endpoint for debugging
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint"""
-    return {"status": "ok", "message": "VulnScout API is running"}
+    return JSONResponse(
+        {"status": "ok", "message": "VulnScout API is running"},
+        headers={"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"}
+    )
 
 
 # Request models
