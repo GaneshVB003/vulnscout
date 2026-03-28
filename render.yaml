@@ -6,7 +6,7 @@ services:
       curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
       pip install -r requirements.txt
       cd ../frontend && npm install && npm run build
-    startCommand: cd ../api && uvicorn main:app --host 0.0.0.0 --port $PORT
+    startCommand: cd ../api && FRONTEND_DIST=../frontend/dist uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
