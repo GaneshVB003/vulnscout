@@ -2,7 +2,6 @@ services:
   - type: web
     name: vulnscout
     dockerfilePath: Dockerfile
-    dockerCommand: sh -c "cd api && FRONTEND_DIST=../frontend/dist python -m uvicorn main:app --host 0.0.0.0 --port 10000"
     envVars:
       - key: FRONTEND_DIST
         value: /app/frontend/dist
