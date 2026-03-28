@@ -101,6 +101,14 @@ export default function App() {
         }
       }, 2000);
       
+      // Defensive: if state doesn't change within 60 seconds, force navigate to results
+      setTimeout(() => {
+        if (appState === 'scanning' && scanId) {
+          console.log('Timeout reached, forcing navigation to results');
+          setAppState('results');
+        }
+      }, 60000);
+      
     } catch (error) {
       console.error('API call FAILED:', error);
       // Show error state - don't fall back to fake scan
