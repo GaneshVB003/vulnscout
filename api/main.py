@@ -66,9 +66,13 @@ app.add_middleware(
 # Actually let's just add a catch-all at the end that serves index.html for non-API routes
 
 # Mount frontend static files if FRONTEND_DIST is set (but only for /assets)
+# Temporarily disable to test if this is causing API issues
 frontend_dist = os.getenv("FRONTEND_DIST")
 if frontend_dist and Path(frontend_dist).exists():
+    print(f"Mounting static files from {frontend_dist}/assets")
     app.mount("/assets", StaticFiles(directory=frontend_dist + "/assets", html=False), name="assets")
+else:
+    print(f"FRONTEND_DIST not set or path doesn't exist: {frontend_dist}")
 
 
 # WebSocket connection manager
