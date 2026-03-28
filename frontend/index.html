@@ -3,7 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VulnScout - Security Assessment Suite v2</title>
+    <title>VulnScout - Security Assessment Suite v3</title>
+    <script>
+      console.log('[INIT] HTML loaded, waiting for React...');
+      window.addEventListener('error', (e) => {
+        console.error('[JS ERROR]', e.message, e.filename, e.lineno);
+      });
+      window.addEventListener('unhandledrejection', (e) => {
+        console.error('[UNHANDLED REJECTION]', e.reason);
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
