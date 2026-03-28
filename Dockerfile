@@ -27,7 +27,9 @@ COPY frontend/tsconfig.json /app/frontend/tsconfig.json
 COPY frontend/tsconfig.node.json /app/frontend/tsconfig.node.json
 COPY frontend/index.html /app/frontend/index.html
 COPY frontend/src /app/frontend/src
-COPY frontend/public /app/frontend/public 2>/dev/null || true
+
+# Create empty public directory if it doesn't exist
+RUN mkdir -p /app/frontend/public
 
 WORKDIR /app/frontend
 RUN npm install && npm run build
