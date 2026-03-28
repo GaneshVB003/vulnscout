@@ -39,4 +39,4 @@ WORKDIR /app
 EXPOSE 10000
 
 # Run the application
-CMD ["sh", "-c", "cd api && FRONTEND_DIST=../frontend/dist python -m uvicorn main:app --host 0.0.0.0 --port 10000"]
+CMD ["sh", "-c", "cd api && FRONTEND_DIST=/app/frontend/dist python -m uvicorn main:app --host 0.0.0.0 --port 10000"]
