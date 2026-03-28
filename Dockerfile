@@ -15,7 +15,8 @@ WORKDIR /app
 COPY api/requirements.txt /app/api/requirements.txt
 RUN pip install --no-cache-dir -r /app/api/requirements.txt
 
-# Copy and build frontend
+# Create frontend directory and copy frontend files
+RUN mkdir -p /app/frontend
 COPY frontend/package.json /app/frontend/package.json
 COPY frontend/package-lock.json /app/frontend/package-lock.json
 COPY frontend/vite.config.ts /app/frontend/vite.config.ts
@@ -24,7 +25,6 @@ COPY frontend/tsconfig.node.json /app/frontend/tsconfig.node.json
 COPY frontend/index.html /app/frontend/index.html
 COPY frontend/src /app/frontend/src
 COPY frontend/public /app/frontend/public
-COPY frontend/postcss.config.js /app/frontend/ 2>/dev/null || true
 
 WORKDIR /app/frontend
 RUN npm install && npm run build
