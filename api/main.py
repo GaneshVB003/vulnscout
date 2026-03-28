@@ -108,6 +108,14 @@ async def health_check():
     )
 
 
+# Debug endpoint to check incoming headers
+@app.get("/api/debug-headers")
+async def debug_headers(request: Request):
+    """Debug endpoint to see incoming headers"""
+    headers = dict(request.headers)
+    return {"headers": headers}
+
+
 # Request models
 class ScanRequestModel(BaseModel):
     target: str
