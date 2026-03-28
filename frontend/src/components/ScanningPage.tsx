@@ -36,17 +36,23 @@ const mockLogs = [
   "Assessment complete."
 ];
 
-export function ScanningPage({ domain, scanId, onComplete, isMockMode }: ScanningPageProps) {
+export function ScanningPage({ domain = '', scanId = '', onComplete, isMockMode, scanResult }: ScanningPageProps) {
+  // Defensive: ensure we have valid values
+  const safeDomain = domain || 'Unknown';
+  const safeScanId = scanId || '';
+  
   const [logs, setLogs] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
+
+  console.log('ScanningPage rendering with:', { safeDomain, safeScanId, isMockMode, scanResult: !!scanResult });
 
   useEffect(() => {
     // If we have a scanId, this is real mode - wait for completion
     if (scanId) {
       setLogs([
-        `[${new Date().toISOString()}] Initializing scan for ${domain}`,
+        `[${new Date().toISOString()}] Initializing scan for ${safeDomain}`,
         `[${new Date().toISOString()}] Connecting to scan engine...`,
-        `[${new Date().toISOString()}] Scan ID: ${scanId}`,
+        `[${new Date().toISOString()}] Scan ID: ${safeScanId}`,
         `[${new Date().toISOString()}] Waiting for scan results...`,
       ]);
       setProgress(10);
