@@ -152,6 +152,11 @@ export default function App() {
         />
       )}
       {appState === 'scanning' && (
+        <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+          <div className="text-white">Loading scanning page...</div>
+        </div>
+      )}
+      {appState === 'scanning' && scanId && (
         <ScanningPage 
           domain={targetDomain} 
           scanId={scanId}
