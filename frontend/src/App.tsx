@@ -147,7 +147,7 @@ export default function App() {
     <>
       {appState === 'scanning' && (
         <div style={{position: 'fixed', top: 0, left: 0, right: 0, background: 'yellow', color: 'black', padding: '10px', zIndex: 9999}}>
-          DEBUG: Scanning state activated - domain: {targetDomain}, scanId: {scanId}
+          DEBUG: appState=scanning, domain={targetDomain}, scanId={scanId}
         </div>
       )}
       {appState === 'landing' && (
