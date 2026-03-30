@@ -2,6 +2,10 @@ services:
   - type: web
     name: vulnscout
     dockerfilePath: Dockerfile
+    env: python
     envVars:
       - key: FRONTEND_DIST
         value: /app/frontend/dist
+      - key: PORT
+        value: 10000
+    startCommand: cd /app/api && python -m uvicorn main:app --host 0.0.0.0 --port $PORT

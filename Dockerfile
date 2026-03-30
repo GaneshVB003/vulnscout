@@ -42,4 +42,4 @@ EXPOSE 10000
 
 # Run the application from api directory
 WORKDIR /app/api
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
+CMD sh -c "python -m uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000}"
